@@ -118,6 +118,9 @@ export const MapView: React.FC<MapViewProps> = ({
                     "formatted_address",
                     "geometry",
                     "reviews",
+                    "photos",
+                    "international_phone_number",
+                    "website",
                   ],
                 },
                 (detail, ds) => {
@@ -145,6 +148,10 @@ export const MapView: React.FC<MapViewProps> = ({
                           rating: rev.rating,
                           text: rev.text,
                         }));
+                    const photoUrl = detail.photos?.[0]?.getUrl({
+                            maxWidth: 600,
+                            maxHeight: 400,
+                        });
 
                     resolve({
                       id: detail.place_id!,
@@ -160,6 +167,9 @@ export const MapView: React.FC<MapViewProps> = ({
                       rating: detail.rating || 0,
                       distanceMeters,
                       reviews,
+                      photoUrl,
+                      phoneNumber: detail.international_phone_number || undefined,
+                      website: detail.website || undefined,
                     });
                   } else {
                     resolve(null);
@@ -253,41 +263,6 @@ export const MapView: React.FC<MapViewProps> = ({
           options={{
             disableDefaultUI: true,
             clickableIcons: false,
-            styles: [
-              { elementType: "geometry", stylers: [{ color: "#050816" }] },
-              {
-                elementType: "labels.text.fill",
-                stylers: [{ color: "#ffffff" }],
-              },
-              {
-                elementType: "labels.text.stroke",
-                stylers: [{ color: "#050816" }],
-              },
-              {
-                featureType: "road",
-                elementType: "geometry",
-                stylers: [{ color: "#111827" }],
-              },
-              {
-                featureType: "road",
-                elementType: "labels",
-                stylers: [{ visibility: "simplified" }],
-              },
-              {
-                featureType: "water",
-                elementType: "geometry",
-                stylers: [{ color: "#0f172a" }],
-              },
-              { featureType: "poi", stylers: [{ visibility: "off" }] },
-              {
-                featureType: "poi.business",
-                stylers: [{ visibility: "off" }],
-              },
-              {
-                featureType: "transit",
-                stylers: [{ visibility: "off" }],
-              },
-            ],
           }}
         >
           {places.map((place) => (
@@ -310,7 +285,7 @@ export const MapView: React.FC<MapViewProps> = ({
         className="pizza-again-btn"
         onClick={handlePizzaNowAgain}
       >
-        PIZZA NOW
+        FIND ANOTHER !
       </button>
     </div>
   );

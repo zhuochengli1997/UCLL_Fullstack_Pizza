@@ -76,39 +76,43 @@ const PizzaNowApp: React.FC = () => {
   );
 
   // (Optional) still used by UserCard; harmless to keep
-  const handleRatePlace = useCallback(
-    (placeId: string, rating: number, note?: string) => {
-      setUserData((prev) => {
-        const existingIndex = prev.ratings.findIndex(
-          (r) => r.placeId === placeId
-        );
-        const updatedRating: UserRating = {
-          placeId,
-          rating,
-          note,
-          updatedAt: new Date().toISOString(),
-        };
+const handleRatePlace = useCallback(
+  (placeId: string, rating: number, note?: string) => {
+    setUserData((prev) => {
+      const existingIndex = prev.ratings.findIndex(
+        (r) => r.placeId === placeId
+      );
 
-        const newRatings =
-          existingIndex >= 0
-            ? prev.ratings.map((r, i) =>
-                i === existingIndex ? updatedRating : r
-              )
-            : [...prev.ratings, updatedRating];
+      const updatedRating: UserRating = {
+        placeId,
+        rating,
+        note,
+        updatedAt: new Date().toISOString(),
+      };
 
-        const visit: Visit = {
-          placeId,
-          visitedAt: new Date().toISOString(),
-        };
+      const newRatings =
+        existingIndex >= 0
+          ? prev.ratings.map((r, i) =>
+              i === existingIndex ? updatedRating : r
+            )
+          : [...prev.ratings, updatedRating];
 
-        return {
-          ratings: newRatings,
-          visits: [...prev.visits, visit],
-        };
-      });
-    },
-    []
-  );
+      const visit: Visit = {
+        placeId,
+        visitedAt: new Date().toISOString(),
+        rating,
+        note,
+      };
+
+      return {
+        ratings: newRatings,
+        visits: [...prev.visits, visit],
+      };
+    });
+  },
+  []
+);
+
 
   return (
     <div className="app-root">
@@ -139,6 +143,7 @@ const PizzaNowApp: React.FC = () => {
                 places={places}
                 userData={userData}
                 selectedPlaceId={selectedPlaceId}
+                onRate={handleRatePlace}
               />
             </div>
           </section>

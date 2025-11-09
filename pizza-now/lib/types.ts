@@ -13,6 +13,9 @@ export interface Place {
   rating: number;           // Google rating
   distanceMeters: number;   // from user / search center
   reviews?: PlaceReview[];  // top few reviews
+  photoUrl?: string;
+  phoneNumber?: string;
+  website?: string;
 }
 
 export interface UserRating {
@@ -25,6 +28,8 @@ export interface UserRating {
 export interface Visit {
   placeId: string;
   visitedAt: string;
+  rating?: number;
+  note?: string;
 }
 
 export interface UserData {

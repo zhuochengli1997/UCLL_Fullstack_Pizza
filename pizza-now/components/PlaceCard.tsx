@@ -8,34 +8,102 @@ const PlaceCard: React.FC<PlaceCardProps> = ({ place }) => {
   if (!place) {
     return (
       <div className="place-card">
-        <p>Select a pizza place from the map.</p>
+        <p>Select a pizza place from the map or press PIZZA NOW.</p>
       </div>
     );
   }
 
-  const distanceKm =
-    place.distanceMeters > 0
-      ? (place.distanceMeters / 1000).toFixed(2)
+  const distanceText =
+    place.distanceMeters && place.distanceMeters > 0
+      ? `${(place.distanceMeters / 1000).toFixed(2)} km away`
       : null;
+
+  const firstReview = place.reviews && place.reviews[0];
 
   return (
     <div className="place-card">
-      <h2>{place.name}</h2>
-      <p className="place-address">{place.address}</p>
+      <div className="place-card-grid">
+        {/* Top-left: Photo */}
+        <div className="place-photo">
+          {place.photoUrl ? (
+            <img
+              src={place.photoUrl}
+              alt={place.name}
+            />
+          ) : (
+            <div className="place-photo-fallback">
+              <span role="img" aria-label="pizza">
+                🍕
+              </span>
+              <p>No photo</p>
+            </div>
+          )}
+        </div>
 
-      <p className="place-public-rating">
-        Google rating: {place.rating ? `⭐ ${place.rating.toFixed(1)}` : "No rating"}
-      </p>
+        {/* Top-right: Info */}
+        <div className="place-info">
+          <h2 className="place-title">{place.name}</h2>
 
-      {distanceKm && (
-        <p className="place-distance">
-          ~ {distanceKm} km from you
-        </p>
-      )}
+          {distanceText && (
+            <div className="place-info-line">
+              <span className="label">Distance</span>
+              <span>{distanceText}</span>
+            </div>
+          )}
 
-      {place.reviews && place.reviews.length > 0 && (
-        <div className="reviews-section">
-          <h4>What people say</h4>
+          <div className="place-info-line">
+            <span className="label">Google Rating</span>
+            <span>
+              {place.rating
+                ? `⭐ ${place.rating.toFixed(1)}`
+                : "No rating"}
+            </span>
+          </div>
+
+          <div className="place-info-line">
+            <span className="label">Address</span>
+            <span>{place.address}</span>
+          </div>
+
+          {place.phoneNumber && (
+            <div className="place-info-line">
+              <span className="label">Phone</span>
+              <span>{place.phoneNumber}</span>
+            </div>
+          )}
+
+          {place.website && (
+            <div className="place-info-line">
+              <span className="label">Website</span>
+              <a
+                href={place.website}
+                target="_blank"
+                rel="noreferrer"
+                className="place-link"
+              >
+                Visit site
+              </a>
+            </div>
+          )}
+
+          {firstReview && (
+            <div className="place-highlight">
+              <span className="label">Vibe</span>
+              <span>
+                {firstReview.text &&
+                firstReview.text.length > 80
+                  ? firstReview.text.slice(0, 80) + "..."
+                  : firstReview.text}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom: Reviews */}
+      <div className="place-reviews-block">
+        <h4>Recent reviews</h4>
+        {place.reviews && place.reviews.length > 0 ? (
           <ul className="reviews-list">
             {place.reviews.map((rev, i) => (
               <li key={i} className="review-item">
@@ -51,16 +119,18 @@ const PlaceCard: React.FC<PlaceCardProps> = ({ place }) => {
                 </div>
                 {rev.text && (
                   <p className="review-text">
-                    {rev.text.length > 180
-                      ? rev.text.slice(0, 180) + "..."
+                    {rev.text.length > 220
+                      ? rev.text.slice(0, 220) + "..."
                       : rev.text}
                   </p>
                 )}
               </li>
             ))}
           </ul>
-        </div>
-      )}
+        ) : (
+          <p className="no-reviews">No reviews available.</p>
+        )}
+      </div>
     </div>
   );
 };
