@@ -1,11 +1,18 @@
+export interface PlaceReview {
+  authorName?: string;
+  rating?: number;
+  text?: string;
+}
+
 export interface Place {
   id: string;
   name: string;
   address: string;
   lat: number;
   lng: number;
-  rating: number;
-  distanceMeters: number;
+  rating: number;           // Google rating
+  distanceMeters: number;   // from user / search center
+  reviews?: PlaceReview[];  // top few reviews
 }
 
 export interface UserRating {

@@ -1,4 +1,4 @@
-/* === Base styles === */
+/* === Base (keep) === */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -10,29 +10,17 @@ body {
   height: 100%;
   background: #050816;
   color: #f9fafb;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-button,
-input,
-textarea {
-  font-family: inherit;
-  color: inherit;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-/* === App layout === */
 .app-root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-/* === Header === */
+/* === Header (keep) === */
 .header {
   height: 56px;
   padding: 0 16px;
@@ -57,7 +45,7 @@ a {
   opacity: 0.7;
 }
 
-/* === Landing screen === */
+/* === Landing (keep) === */
 .landing {
   position: fixed;
   inset: 0;
@@ -81,8 +69,14 @@ a {
 }
 
 @keyframes fadein {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .landing-content h1 {
@@ -111,31 +105,60 @@ a {
   opacity: 0.9;
 }
 
-/* === Main layout === */
+/* === Main layout: 30% / 70% columns === */
 .main-layout {
   display: grid;
-  grid-template-columns: 2fr 1.3fr;
+  grid-template-columns: 30% 70%;
   gap: 12px;
   padding: 12px;
   height: calc(100vh - 56px);
 }
 
-.map-section,
-.side-section {
+/* === LEFT COLUMN: map (80%) + button (20%) === */
+
+.map-section {
+  height: 100%;
+}
+
+.map-column {
   display: flex;
   flex-direction: column;
+  height: 100%;
   gap: 8px;
 }
 
-/* === MapView === */
-.map-view {
-  flex: 1;
-  display: grid;
-  grid-template-rows: 1.5fr 1fr;
-  gap: 8px;
+.map-wrapper {
+  flex: 1 1 0;
+  min-height: 0; /* important so the map can shrink inside flex */
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.pizza-again-btn {
+  flex: 0 0 64px; /* about 20% visually; tweak if needed */
+  width: 100%;
+  border: none;
+  border-radius: 16px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(135deg, #e11d48, #f59e0b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.08em;
+  transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pizza-again-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.95;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
 .map-placeholder {
+  width: 100%;
+  height: 100%;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: #0f172a;
@@ -146,49 +169,21 @@ a {
   font-size: 0.9rem;
 }
 
-.place-list {
-  list-style: none;
-  overflow-y: auto;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
+/* === RIGHT COLUMN: PlaceCard (top) + UserCard (bottom) === */
 
-.place-list-item {
-  padding: 10px;
-  cursor: pointer;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  transition: background 0.2s ease;
-}
-
-.place-list-item:hover {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.place-list-item--active {
-  background: rgba(255, 255, 255, 0.1);
-  border-left: 3px solid #f59e0b;
-}
-
-.place-name {
-  font-weight: 600;
-}
-
-.place-meta {
-  font-size: 0.85rem;
-  opacity: 0.75;
-}
-
-/* === PlaceCard / UserCard layout === */
 .side-section {
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
 }
 
 .placecard-wrapper {
-  flex: 0 0 80%;
+  flex: 3 1 0;
 }
 
 .usercard-wrapper {
-  flex: 0 0 20%;
+  flex: 1 1 0;
 }
 
 .place-card,
@@ -200,12 +195,15 @@ a {
   padding: 12px;
   display: flex;
   flex-direction: column;
+  gap: 6px;
   overflow-y: auto;
 }
 
-/* === PlaceCard === */
+/* === PlaceCard content === */
+
 .place-card h2 {
-  margin-bottom: 0.25rem;
+  margin-bottom: 2px;
+  font-size: 1.3rem;
 }
 
 .place-address {
@@ -216,77 +214,69 @@ a {
 .place-public-rating,
 .place-distance {
   font-size: 0.9rem;
-  margin-top: 4px;
+  opacity: 0.9;
+}
+
+/* Reviews */
+.reviews-section {
+  margin-top: 8px;
+}
+
+.reviews-section h4 {
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.reviews-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.8rem;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.review-item {
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.review-author {
+  opacity: 0.9;
+}
+
+.review-rating {
   opacity: 0.85;
 }
 
-.user-rating-section {
-  margin-top: 12px;
+.review-text {
+  margin-top: 1px;
+  opacity: 0.75;
 }
 
-.stars {
-  display: flex;
-  gap: 4px;
-  margin: 6px 0;
-  font-size: 1.2rem;
-}
+/* === UserCard quick styles (you can adjust) === */
 
-.star {
-  cursor: pointer;
-  color: #444;
-}
-
-.star--active {
-  color: #f59e0b;
-}
-
-textarea {
-  width: 100%;
-  min-height: 60px;
-  background: rgba(255, 255, 255, 0.06);
-  border: none;
-  border-radius: 8px;
-  padding: 6px;
-  margin-top: 4px;
-  resize: none;
-  color: #f9fafb;
-}
-
-.save-rating-btn {
-  margin-top: 8px;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #f59e0b, #e11d48);
-  cursor: pointer;
-  font-weight: 600;
-  color: #fff;
-}
-
-.last-updated {
-  font-size: 0.8rem;
-  margin-top: 4px;
-  opacity: 0.6;
-}
-
-/* === UserCard === */
 .user-card h3 {
-  margin-bottom: 8px;
-}
-
-.selected-place-rating strong {
-  display: block;
+  font-size: 1rem;
   margin-bottom: 4px;
 }
 
 .visit-history h4 {
-  margin-top: 10px;
-  margin-bottom: 4px;
+  font-size: 0.85rem;
+  margin: 4px 0;
 }
 
 .visit-history ul {
   list-style: none;
-  font-size: 0.85rem;
+  padding: 0;
+  margin: 0;
+  font-size: 0.8rem;
   opacity: 0.8;
 }
 
@@ -294,25 +284,31 @@ textarea {
   margin-bottom: 2px;
 }
 
-/* === Scrollbars === */
+/* === Scrollbar === */
+
 ::-webkit-scrollbar {
   width: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.18);
   border-radius: 6px;
 }
 
-/* === Responsiveness === */
+/* === Responsive === */
+
 @media (max-width: 900px) {
   .main-layout {
     grid-template-columns: 1fr;
+    height: auto;
   }
-  .placecard-wrapper {
-    flex: 1;
+
+  .map-column {
+    height: 260px;
   }
+
+  .placecard-wrapper,
   .usercard-wrapper {
-    flex: 1;
+    flex: unset;
   }
 }

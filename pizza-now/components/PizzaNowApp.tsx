@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Place, UserData, UserRating, Visit } from "@/lib/types";
 import { Header } from "./Header";
 import { Landing } from "./Landing";
@@ -9,36 +9,6 @@ import { PlaceCard } from "./PlaceCard";
 import { UserCard } from "./UserCard";
 
 const STORAGE_KEY = "pizzaNow_userData";
-
-const mockPlaces: Place[] = [
-  {
-    id: "1",
-    name: "Napoli Express",
-    address: "Main Street 12",
-    lat: 50.879,
-    lng: 4.701,
-    rating: 4.5,
-    distanceMeters: 300,
-  },
-  {
-    id: "2",
-    name: "Vesuvio Slice",
-    address: "Central Square 5",
-    lat: 50.88,
-    lng: 4.699,
-    rating: 4.2,
-    distanceMeters: 550,
-  },
-  {
-    id: "3",
-    name: "Luigi's Pizza Lab",
-    address: "Tech Park 3",
-    lat: 50.881,
-    lng: 4.703,
-    rating: 4.8,
-    distanceMeters: 750,
-  },
-];
 
 const loadUserData = (): UserData => {
   if (typeof window === "undefined") return { ratings: [], visits: [] };
@@ -59,8 +29,10 @@ const saveUserData = (data: UserData) => {
 const PizzaNowApp: React.FC = () => {
   const [showLanding, setShowLanding] = useState(true);
   const [landingFadeOut, setLandingFadeOut] = useState(false);
-  const [places] = useState<Place[]>(mockPlaces);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(mockPlaces[0]);
+
+  const [places, setPlaces] = useState<Place[]>([]);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+
   const [userData, setUserData] = useState<UserData>({ ratings: [], visits: [] });
 
   useEffect(() => {
@@ -75,45 +47,68 @@ const PizzaNowApp: React.FC = () => {
     setLandingFadeOut(true);
     setTimeout(() => {
       setShowLanding(false);
-    }, 400); // sync with CSS transition
+    }, 400);
   };
 
-  const handleSelectPlace = (placeId: string) => {
-    const place = places.find((p) => p.id === placeId) || null;
-    setSelectedPlace(place);
-  };
+  const handleSelectPlace = useCallback((placeId: string) => {
+    setSelectedPlaceId(placeId);
+  }, []);
 
-  const handleRatePlace = (placeId: string, rating: number, note?: string) => {
-    setUserData((prev) => {
-      const existingIndex = prev.ratings.findIndex(
-        (r) => r.placeId === placeId
-      );
-      const updatedRating: UserRating = {
-        placeId,
-        rating,
-        note,
-        updatedAt: new Date().toISOString(),
-      };
+  const handlePlacesUpdate = useCallback((newPlaces: Place[]) => {
+    setPlaces(newPlaces);
 
-      let newRatings: UserRating[];
-      if (existingIndex >= 0) {
-        newRatings = [...prev.ratings];
-        newRatings[existingIndex] = updatedRating;
-      } else {
-        newRatings = [...prev.ratings, updatedRating];
-      }
+    if (newPlaces.length === 0) {
+      setSelectedPlaceId(null);
+      return;
+    }
 
-      const visit: Visit = {
-        placeId,
-        visitedAt: new Date().toISOString(),
-      };
+    // Always pick a random place once per completed search
+    const randomIndex = Math.floor(Math.random() * newPlaces.length);
+    setSelectedPlaceId(newPlaces[randomIndex].id);
+  }, []);
 
-      return {
-        ratings: newRatings,
-        visits: [...prev.visits, visit],
-      };
-    });
-  };
+  const selectedPlace = useMemo(
+    () =>
+      selectedPlaceId
+        ? places.find((p) => p.id === selectedPlaceId) || null
+        : null,
+    [places, selectedPlaceId]
+  );
+
+  // (Optional) still used by UserCard; harmless to keep
+  const handleRatePlace = useCallback(
+    (placeId: string, rating: number, note?: string) => {
+      setUserData((prev) => {
+        const existingIndex = prev.ratings.findIndex(
+          (r) => r.placeId === placeId
+        );
+        const updatedRating: UserRating = {
+          placeId,
+          rating,
+          note,
+          updatedAt: new Date().toISOString(),
+        };
+
+        const newRatings =
+          existingIndex >= 0
+            ? prev.ratings.map((r, i) =>
+                i === existingIndex ? updatedRating : r
+              )
+            : [...prev.ratings, updatedRating];
+
+        const visit: Visit = {
+          placeId,
+          visitedAt: new Date().toISOString(),
+        };
+
+        return {
+          ratings: newRatings,
+          visits: [...prev.visits, visit],
+        };
+      });
+    },
+    []
+  );
 
   return (
     <div className="app-root">
@@ -128,29 +123,22 @@ const PizzaNowApp: React.FC = () => {
           <section className="map-section">
             <MapView
               places={places}
-              selectedPlaceId={selectedPlace?.id || null}
+              selectedPlaceId={selectedPlaceId}
               onSelectPlace={handleSelectPlace}
+              onPlacesUpdate={handlePlacesUpdate}
             />
           </section>
+
           <section className="side-section">
             <div className="placecard-wrapper">
-              {selectedPlace && (
-                <PlaceCard
-                  place={selectedPlace}
-                  userRating={
-                    userData.ratings.find(
-                      (r) => r.placeId === selectedPlace.id
-                    ) || null
-                  }
-                  onRate={handleRatePlace}
-                />
-              )}
+              <PlaceCard place={selectedPlace} />
             </div>
+
             <div className="usercard-wrapper">
               <UserCard
                 places={places}
                 userData={userData}
-                selectedPlaceId={selectedPlace?.id || null}
+                selectedPlaceId={selectedPlaceId}
               />
             </div>
           </section>
